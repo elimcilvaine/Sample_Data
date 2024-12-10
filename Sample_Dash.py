@@ -30,7 +30,7 @@ app.layout = html.Div([
     dcc.Graph(id="scatter-plot")
 ])
 
-# Callback to update the graph based on the dropdown\
+# Callback to update the graph based on the dropdown
 @app.callback(
     Output("scatter-plot", "figure"),
     Input("category-filter", "value")
@@ -43,4 +43,4 @@ def update_graph(selected_category):
 # Run the app
 if __name__ == "__main__":
     app.run_server(debug=True)
-}
+
