@@ -6,29 +6,48 @@
 \pard\tx720\tx1440\tx2160\tx2880\tx3600\tx4320\tx5040\tx5760\tx6480\tx7200\tx7920\tx8640\pardirnatural\partightenfactor0
 
 \f0\fs24 \cf0 import dash\
-from dash import dcc, html\
-import plotly.graph_objs as go\
+from dash import dcc, html, Input, Output\
+import plotly.express as px\
+import pandas as pd\
+\
+# Initialize the Dash app\
+app = dash.Dash(__name__)\
+server = app.server  # For deployment on Render\
 \
 # Sample data\
-x = [1, 2, 3, 4, 5]\
-y = [10, 11, 12, 13, 14]\
+df = pd.DataFrame(\{\
+    "x": [1, 2, 3, 4, 5],\
+    "y": [10, 20, 30, 40, 50],\
+    "category": ["A", "B", "A", "B", "A"]\
+\})\
 \
-# Create a Dash app\
-app = dash.Dash(__name__)\
-server = app.server\
-# Layout with a simple plot\
+# Layout of the app\
 app.layout = html.Div([\
-    html.H1("Simple Dash Dashboard"),\
-    dcc.Graph(\
-        id='line-plot',\
-        figure=\{\
-            'data': [\
-                go.Scatter(x=x, y=y, mode='lines', name='Sample Line')\
-            ],\
-            'layout': go.Layout(title='Simple Line Plot')\
-        \}\
-    )\
+    html.H1("Sample Dash Dashboard"),\
+    html.P("Select a category to filter the data:"),\
+    dcc.Dropdown(\
+        id="category-filter",\
+        options=[\
+            \{"label": "All", "value": "All"\},\
+            \{"label": "A", "value": "A"\},\
+            \{"label": "B", "value": "B"\}\
+        ],\
+        value="All"\
+    ),\
+    dcc.Graph(id="scatter-plot")\
 ])\
 \
-if __name__ == '__main__':\
-    app.run_server(debug=True)}
+# Callback to update the graph based on the dropdown\
+@app.callback(\
+    Output("scatter-plot", "figure"),\
+    Input("category-filter", "value")\
+)\
+def update_graph(selected_category):\
+    filtered_df = df if selected_category == "All" else df[df["category"] == selected_category]\
+    fig = px.scatter(filtered_df, x="x", y="y", title="Scatter Plot", color="category")\
+    return fig\
+\
+# Run the app\
+if __name__ == "__main__":\
+    app.run_server(debug=True)\
+}
